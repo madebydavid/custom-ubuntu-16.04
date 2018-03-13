@@ -22,7 +22,12 @@ TMP_INITRD_DIR="`mktemp -d`"
 # download and extract netboot iso
 SOURCE_ISO_URL="http://archive.ubuntu.com/ubuntu/dists/xenial/main/installer-amd64/current/images/netboot/mini.iso"
 cd "$TMP_DOWNLOAD_DIR"
-wget -4 "$SOURCE_ISO_URL" -O "./netboot.iso"
+
+if [ ! -f "$SCRIPT_DIR/mini.iso" ]; then
+	wget -4 "$SOURCE_ISO_URL" -O "./netboot.iso"
+else
+	cp "$SCRIPT_DIR/mini.iso" "./netboot.iso"
+fi
 7z x "./netboot.iso" "-o$TMP_DISC_DIR"
 
 # patch boot menu
@@ -44,7 +49,7 @@ cat "./initrd" | gzip -9c > "$TMP_DISC_DIR/initrd.gz"
 # build iso
 cd "$TMP_DISC_DIR"
 rm -r '[BOOT]'
-mkisofs -r -V "ubuntu 16.04 netboot unattended" -cache-inodes -J -l -b isolinux.bin -c boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -input-charset utf-8 -o "$TARGET_ISO" ./
+mkisofs -r -V "ubuntu" -cache-inodes -J -l -b isolinux.bin -c boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -input-charset utf-8 -o "$TARGET_ISO" ./
 
 # go back to initial directory
 cd "$CURRENT_DIR"
